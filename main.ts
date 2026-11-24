@@ -151,8 +151,19 @@ function main(): void {
   // If this ever fails, the program throws instead of claiming success.
   const roundTrip = readFileSync(outPath, "utf8");
   if (roundTrip !== TEXT) {
+    // Find the first position where the two strings differ, so a
+    // mismatch is diagnosable instead of just "different": a missing
+    // trailing newline shows up at the end, an encoding surprise
+    // shows up at the altered character.
+    let firstDiff = 0;
+    while (
+      firstDiff < Math.min(roundTrip.length, TEXT.length) &&
+      roundTrip[firstDiff] === TEXT[firstDiff]
+    ) {
+      firstDiff++;
+    }
     throw new Error(
-      `round-trip check failed: entry.txt (${roundTrip.length} chars) differs from TEXT (${TEXT.length} chars)`,
+      `round-trip check failed: entry.txt (${roundTrip.length} chars) differs from TEXT (${TEXT.length} chars) at position ${firstDiff}`,
     );
   }
 
